@@ -10,11 +10,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.google.android.material.bottomappbar.BottomAppBar.FabAlignmentMode
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
-fun UserLoginScreen(
+fun UsernameScreen(
     viewModel: UserLoginViewModel = hiltViewModel(),
     onNavigate: (String) -> Unit
 ) {
@@ -40,7 +39,7 @@ fun UserLoginScreen(
                 placeholder = {
                     Text(text = "Enter a username...")
                 },
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(8.dp))
             Button(onClick = viewModel::onJoinClick) {

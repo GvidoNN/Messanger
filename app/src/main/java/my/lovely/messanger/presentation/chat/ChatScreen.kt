@@ -56,7 +56,7 @@ fun ChatScreen(
         }
 
     }
-
+    
     val state = viewModel.state.value
 
 

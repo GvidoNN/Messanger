@@ -1,5 +1,6 @@
 package my.lovely.messanger.data
 
+import android.util.Log
 import io.ktor.client.*
 import io.ktor.client.features.websocket.*
 import io.ktor.client.request.*
@@ -20,6 +21,7 @@ class ChatSocketServiceImpl(
 
 
     override suspend fun initSession(userName: String): Resource<Unit> {
+        Log.d("MyLog","ChatSocketServiceImpl initSession")
         return try {
             socket = client.webSocketSession {
                 url("${ChatSocketService.Endpoints.ChatSocket.url}?username=$userName")
@@ -35,6 +37,7 @@ class ChatSocketServiceImpl(
     }
 
     override suspend fun sendMessage(message: String) {
+        Log.d("MyLog","ChatSocketServiceImpl sendMessage")
         try {
             socket?.send(Frame.Text(message))
         } catch (e: java.lang.Exception) {
@@ -43,6 +46,7 @@ class ChatSocketServiceImpl(
     }
 
     override suspend fun observeMessages(): Flow<Message> {
+        Log.d("MyLog","ChatSocketServiceImpl observeMessages")
         return try {
             socket?.incoming
                 ?.receiveAsFlow()
@@ -59,6 +63,7 @@ class ChatSocketServiceImpl(
     }
 
     override suspend fun closeSession() {
+        Log.d("MyLog","ChatSocketServiceImpl closeSession")
         socket?.close()
     }
 

@@ -1,5 +1,6 @@
 package my.lovely.messanger.presentation.chat
 
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
@@ -35,6 +36,7 @@ class ChatViewModel @Inject constructor(
     val toastEvent = _toastEvent.asSharedFlow()
 
     fun connectToChat() {
+        Log.d("MyLog","ChatViewModel connectToChat")
         getAllMessages()
         savedStateHandle.get<String>("username")?.let {
             viewModelScope.launch(Dispatchers.IO) {
@@ -60,24 +62,30 @@ class ChatViewModel @Inject constructor(
     }
 
     fun onMessageChange(message: String){
+        Log.d("MyLog","ChatViewModel onMessageChange")
         _messageText.value = message
     }
 
     fun disconnect(){
+        Log.d("MyLog","ChatViewModel disconnect")
         viewModelScope.launch(Dispatchers.IO) {
             chatSocketService.closeSession()
         }
     }
 
     fun sendMessage() {
+        Log.d("MyLog","ChatViewModel sendMessage")
         viewModelScope.launch(Dispatchers.IO) {
             if(messageText.value.isNotBlank()){
                 chatSocketService.sendMessage(messageText.value)
+                _messageText.value = ""
             }
         }
+
     }
 
     fun getAllMessages(){
+        Log.d("MyLog","ChatViewModel geAllMEssages")
         viewModelScope.launch(Dispatchers.IO) {
             _state.value = state.value.copy(isLoading = true)
             val result = messageService.getAllMessages()
@@ -86,6 +94,7 @@ class ChatViewModel @Inject constructor(
     }
 
     override fun onCleared() {
+        Log.d("MyLog","ChatViewModel onCleared")
         super.onCleared()
         disconnect()
     }

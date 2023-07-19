@@ -1,5 +1,6 @@
 package my.lovely.messanger.presentation.userLogin
 
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -22,10 +23,12 @@ class UserLoginViewModel @Inject constructor() : ViewModel() {
     val onJoinChat = _onJoinChat.asSharedFlow()
 
     fun onUserNameChange(userName: String){
-
+        Log.d("MyLog","UserLoginViewModel onUserNameChange")
+        _userNameText.value = userName
     }
 
     fun onJoinClick(){
+        Log.d("MyLog","UserLoginViewModel onJoinClick")
         viewModelScope.launch(Dispatchers.IO) {
             if(userNameText.value.isNotBlank()) {
                 _onJoinChat.emit(userNameText.value)
