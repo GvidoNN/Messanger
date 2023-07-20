@@ -17,7 +17,8 @@ data class MessageDTO(
         return Message(
             text = text,
             formattedTime = formattedDate,
-            userName = userName
+            userName = userName,
+            id = id
         )
     }
 }

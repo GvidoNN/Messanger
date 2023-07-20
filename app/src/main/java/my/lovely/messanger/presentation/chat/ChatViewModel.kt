@@ -24,7 +24,7 @@ class ChatViewModel @Inject constructor(
     private val messageService: MessageService,
     private val chatSocketService: ChatSocketService,
     private val savedStateHandle: SavedStateHandle
-): ViewModel() {
+) : ViewModel() {
 
     private val _messageText = mutableStateOf("")
     val messageText: State<String> = _messageText
@@ -35,13 +35,23 @@ class ChatViewModel @Inject constructor(
     private val _toastEvent = MutableSharedFlow<String>()
     val toastEvent = _toastEvent.asSharedFlow()
 
-    fun connectToChat() {
-        Log.d("MyLog","ChatViewModel connectToChat")
+    fun send(event: Event) {
+        when (event) {
+            is Event.DeleteMessageEvent -> deleteMessage(event.messageId)
+            is Event.SendMessageEvent -> sendMessage()
+            is Event.GetAllMessages -> getAllMessages()
+            is Event.ConnectToChat -> connectToChat()
+            is Event.DisconnectFromChat -> disconnect()
+        }
+    }
+
+    private fun connectToChat() {
+        Log.d("MyLog", "ChatViewModel connectToChat")
         getAllMessages()
         savedStateHandle.get<String>("username")?.let {
             viewModelScope.launch(Dispatchers.IO) {
                 val result = chatSocketService.initSession(userName = it)
-                when(result){
+                when (result) {
                     is Resource.Success -> {
                         chatSocketService.observeMessages().onEach { message ->
                             val newList = state.value.message.toMutableList().apply {
@@ -61,22 +71,22 @@ class ChatViewModel @Inject constructor(
         }
     }
 
-    fun onMessageChange(message: String){
-        Log.d("MyLog","ChatViewModel onMessageChange")
+    fun onMessageChange(message: String) {
+        Log.d("MyLog", "ChatViewModel onMessageChange")
         _messageText.value = message
     }
 
-    fun disconnect(){
-        Log.d("MyLog","ChatViewModel disconnect")
+    private fun disconnect() {
+        Log.d("MyLog", "ChatViewModel disconnect")
         viewModelScope.launch(Dispatchers.IO) {
             chatSocketService.closeSession()
         }
     }
 
-    fun sendMessage() {
-        Log.d("MyLog","ChatViewModel sendMessage")
+    private fun sendMessage() {
+        Log.d("MyLog", "ChatViewModel sendMessage")
         viewModelScope.launch(Dispatchers.IO) {
-            if(messageText.value.isNotBlank()){
+            if (messageText.value.isNotBlank()) {
                 chatSocketService.sendMessage(messageText.value)
                 _messageText.value = ""
             }
@@ -84,8 +94,15 @@ class ChatViewModel @Inject constructor(
 
     }
 
-    fun getAllMessages(){
-        Log.d("MyLog","ChatViewModel geAllMEssages")
+    private fun deleteMessage(messageId: String) {
+        Log.d("MyLog", "ChatViewModel deleteMessage")
+        viewModelScope.launch(Dispatchers.IO) {
+            chatSocketService.deleteMessage(message = messageId)
+        }
+    }
+
+    fun getAllMessages() {
+        Log.d("MyLog", "ChatViewModel geAllMEssages")
         viewModelScope.launch(Dispatchers.IO) {
             _state.value = state.value.copy(isLoading = true)
             val result = messageService.getAllMessages()
@@ -94,7 +111,7 @@ class ChatViewModel @Inject constructor(
     }
 
     override fun onCleared() {
-        Log.d("MyLog","ChatViewModel onCleared")
+        Log.d("MyLog", "ChatViewModel onCleared")
         super.onCleared()
         disconnect()
     }

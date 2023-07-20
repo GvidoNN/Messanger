@@ -11,6 +11,8 @@ interface ChatSocketService {
 
     suspend fun sendMessage(message: String)
 
+    suspend fun deleteMessage(message: String)
+
     suspend fun observeMessages(): kotlinx.coroutines.flow.Flow<Message>
 
     suspend fun closeSession()

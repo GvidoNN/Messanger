@@ -12,6 +12,7 @@ import kotlinx.serialization.json.Json
 import my.lovely.messanger.data.dto.MessageDTO
 import my.lovely.messanger.domain.Resource
 import my.lovely.messanger.domain.model.Message
+import my.lovely.messanger.ui.theme.MessangerTheme
 
 class ChatSocketServiceImpl(
     private val client: HttpClient
@@ -45,6 +46,15 @@ class ChatSocketServiceImpl(
         }
     }
 
+    override suspend fun deleteMessage(messageId: String) {
+        Log.d("MyLog","ChatSocketServiceImpl deleteMessage")
+        try {
+            socket?.send(Frame.Text("/delete$messageId"))
+        } catch (e: java.lang.Exception) {
+            e.printStackTrace()
+        }
+    }
+
     override suspend fun observeMessages(): Flow<Message> {
         Log.d("MyLog","ChatSocketServiceImpl observeMessages")
         return try {
@@ -53,10 +63,12 @@ class ChatSocketServiceImpl(
                 ?.filter { it is Frame.Text }
                 ?.map {
                     val json = (it as? Frame.Text)?.readText() ?: ""
+                    Log.d("MyLog",json)
                     val messageDto = Json.decodeFromString<MessageDTO>(json)
                     messageDto.toMessage()
                 } ?: flow {  }
         } catch(e: Exception) {
+            Log.d("MyLog","observeMessages $e")
             e.printStackTrace()
             flow {  }
         }

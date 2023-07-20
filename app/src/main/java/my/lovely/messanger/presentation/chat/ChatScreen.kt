@@ -1,7 +1,9 @@
 package my.lovely.messanger.presentation.chat
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -15,11 +17,11 @@ import androidx.compose.material.icons.filled.Send
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MonotonicFrameClock
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
@@ -45,9 +47,9 @@ fun ChatScreen(
     DisposableEffect(key1 = lifecyclerOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_START) {
-                viewModel.connectToChat()
+                viewModel.send(event = Event.ConnectToChat)
             } else if (event == Lifecycle.Event.ON_STOP) {
-                viewModel.disconnect()
+                viewModel.send(event = Event.DisconnectFromChat)
             }
         }
         lifecyclerOwner.lifecycle.addObserver(observer)
@@ -73,15 +75,22 @@ fun ChatScreen(
             item {
                 Spacer(modifier = Modifier.height(32.dp))
             }
-            items(state.message) {
-                val isOwnMessage = it.userName == username
+            items(state.message) {message ->
+                val isOwnMessage = message.userName == username
                 Box(
                     contentAlignment = if (isOwnMessage) {
                         Alignment.CenterEnd
                     } else {
                         Alignment.CenterStart
                     },
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize().pointerInput(Unit) {
+                        detectTapGestures(
+                            onPress = { Log.d("MyLog","Clicl") },
+                            onDoubleTap = { Log.d("MyLog","Double Tap") },
+                            onLongPress = { viewModel.send(event = Event.DeleteMessageEvent(messageId = message.id)) },
+                            onTap = { Log.d("MyLog","Tap") }
+                        )
+                    }
                 ) {
                     Column(modifier = Modifier
                         .width(200.dp)
@@ -119,16 +128,16 @@ fun ChatScreen(
 
                     {
                         Text(
-                            text = it.userName,
+                            text = message.userName,
                             fontWeight = FontWeight.Bold,
                             color = androidx.compose.ui.graphics.Color.White
                         )
                         Text(
-                            text = it.text,
+                            text = message.text,
                             color = androidx.compose.ui.graphics.Color.White
                         )
                         Text(
-                            text = it.formattedTime,
+                            text = message.formattedTime,
                             color = androidx.compose.ui.graphics.Color.White,
                             modifier = Modifier.align(Alignment.End)
                         )
@@ -148,7 +157,7 @@ fun ChatScreen(
                 modifier = Modifier.weight(1f)
             )
 
-            IconButton(onClick = viewModel::sendMessage) {
+            IconButton(onClick = { viewModel.send(Event.SendMessageEvent) }) {
                 Icon(imageVector = Icons.Default.Send, contentDescription = "Send")
 
             }
