@@ -12,18 +12,17 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 
 @Composable
-fun DropDownMenu() {
-    var expanded by remember { mutableStateOf(true) }
+fun DropDownMenu(expanded: Boolean, onExpandedChange: (Boolean) -> Unit) {
     val items = listOf("Item 1", "Item 2", "Item 3")
     Box(modifier = Modifier.wrapContentSize()) {
         DropdownMenu(
             expanded = expanded,
-            onDismissRequest = { expanded = false },
+            onDismissRequest = { onExpandedChange(false) },
             modifier = Modifier.width(IntrinsicSize.Min)
         ) {
             items.forEach { label ->
                 DropdownMenuItem(onClick = {
-                    expanded = false
+                    onExpandedChange(false)
                 }) {
                     Text(label)
                 }

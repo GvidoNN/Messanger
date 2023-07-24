@@ -57,8 +57,6 @@ fun ChatScreen(
 
     val state = viewModel.state.value
 
-    var expanded by remember { mutableStateOf(false) }
-    val items = listOf("Item 1", "Item 2", "Item 3")
     var showMenu by remember { mutableStateOf(false) }
     var menuState by remember { mutableStateOf(false) }
 
@@ -102,15 +100,7 @@ fun ChatScreen(
             }
 
             IconButton(onClick = {
-                if(showMenu && menuState){
-                    showMenu = false
-                    menuState = false
-                    Log.d("MyLog","Закрываем")
-                } else {
-                    showMenu = true
-                    menuState = true
-                    Log.d("MyLog","Открываем")
-                }
+                showMenu = !showMenu
 
             }) {
                 Icon(imageVector = Icons.Default.Add, contentDescription = "Attach")
@@ -118,7 +108,7 @@ fun ChatScreen(
 
             if (showMenu) {
                 Log.d("MyLog", "Вылазий")
-                DropDownMenu()
+                DropDownMenu(expanded = showMenu, onExpandedChange = {showMenu = it})
             }
         }
 
