@@ -8,15 +8,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Send
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -58,8 +54,13 @@ fun ChatScreen(
         }
 
     }
-    
+
     val state = viewModel.state.value
+
+    var expanded by remember { mutableStateOf(false) }
+    val items = listOf("Item 1", "Item 2", "Item 3")
+    var showMenu by remember { mutableStateOf(false) }
+    var menuState by remember { mutableStateOf(false) }
 
 
     Column(
@@ -75,75 +76,13 @@ fun ChatScreen(
             item {
                 Spacer(modifier = Modifier.height(32.dp))
             }
-            items(state.message) {message ->
+            items(state.message) { message ->
                 val isOwnMessage = message.userName == username
-                Box(
-                    contentAlignment = if (isOwnMessage) {
-                        Alignment.CenterEnd
-                    } else {
-                        Alignment.CenterStart
-                    },
-                    modifier = Modifier.fillMaxSize().pointerInput(Unit) {
-                        detectTapGestures(
-                            onPress = { Log.d("MyLog","Clicl") },
-                            onDoubleTap = { Log.d("MyLog","Double Tap") },
-                            onLongPress = { viewModel.send(event = Event.DeleteMessageEvent(messageId = message.id)) },
-                            onTap = { Log.d("MyLog","Tap") }
-                        )
-                    }
-                ) {
-                    Column(modifier = Modifier
-                        .width(200.dp)
-                        .drawBehind {
-                            val cornerRadius = 10.dp.toPx()
-                            val triangleHeight = 20.dp.toPx()
-                            val triangleWidth = 25.dp.toPx()
-                            val trianglePath = Path().apply {
-                                if (isOwnMessage) {
-                                    moveTo(size.width, size.height - cornerRadius)
-                                    lineTo(size.width, size.height + triangleHeight)
-                                    lineTo(
-                                        size.width - triangleWidth,
-                                        size.height - cornerRadius
-                                    )
-                                    close()
-                                } else {
-                                    moveTo(0f, size.height - cornerRadius)
-                                    lineTo(0f, size.height + triangleHeight)
-                                    lineTo(triangleWidth, size.height - cornerRadius)
-                                    close()
-                                }
-                            }
-                            drawPath(
-                                path = trianglePath,
-                                color = if (isOwnMessage) androidx.compose.ui.graphics.Color.Green else androidx.compose.ui.graphics.Color.DarkGray
-                            )
-
-                        }
-                        .background(
-                            color = if (isOwnMessage) androidx.compose.ui.graphics.Color.Green else androidx.compose.ui.graphics.Color.DarkGray,
-                            shape = RoundedCornerShape(10.dp)
-                        )
-                        .padding(8.dp))
-
-                    {
-                        Text(
-                            text = message.userName,
-                            fontWeight = FontWeight.Bold,
-                            color = androidx.compose.ui.graphics.Color.White
-                        )
-                        Text(
-                            text = message.text,
-                            color = androidx.compose.ui.graphics.Color.White
-                        )
-                        Text(
-                            text = message.formattedTime,
-                            color = androidx.compose.ui.graphics.Color.White,
-                            modifier = Modifier.align(Alignment.End)
-                        )
-
-                    }
-                }
+                MessageItems(
+                    messageData = message,
+                    isOwnMessage = isOwnMessage,
+                    mainViewModel = viewModel
+                )
             }
         }
 
@@ -162,9 +101,29 @@ fun ChatScreen(
 
             }
 
+            IconButton(onClick = {
+                if(showMenu && menuState){
+                    showMenu = false
+                    menuState = false
+                    Log.d("MyLog","Закрываем")
+                } else {
+                    showMenu = true
+                    menuState = true
+                    Log.d("MyLog","Открываем")
+                }
+
+            }) {
+                Icon(imageVector = Icons.Default.Add, contentDescription = "Attach")
+            }
+
+            if (showMenu) {
+                Log.d("MyLog", "Вылазий")
+                DropDownMenu()
+            }
         }
 
     }
 
 
 }
+

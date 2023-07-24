@@ -98,6 +98,7 @@ class ChatViewModel @Inject constructor(
         Log.d("MyLog", "ChatViewModel deleteMessage")
         viewModelScope.launch(Dispatchers.IO) {
             chatSocketService.deleteMessage(message = messageId)
+            //val newList = state.value.message.toMutableList().remove()
         }
     }
 
